@@ -569,7 +569,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"condition\": \"EXCELLENT\",\n    \"till_date\": \"2021-10-11\"\n}"
+							"raw": "{\n    \"condition\": \"EXCELLENT\",\n    \"tillDate\": \"2021-10-11\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/v1/reservations/:reservationUid/return",
