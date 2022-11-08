@@ -33,15 +33,14 @@ jobs:
         run: sleep 25s
         shell: bash
 
-      # Skip tests (repeats in `education/autograding@v1`)
-      # - name: Run API Tests
-      #   uses: matt-ball/newman-action@master
-      #   with:
-      #     # TODO insert your variant
-      #     collection: v4/postman/collection.json
-      #     environment: v4/postman/environment.json
-      #     delayRequest: 100
-      #     reporters: '[ "cli" ]'
+      - name: Run API Tests
+        uses: matt-ball/newman-action@master
+        with:
+          # TODO insert your variant
+          collection: v4/postman/collection.json
+          environment: v4/postman/environment.json
+          delayRequest: 100
+          reporters: '[ "cli" ]'
 
       - uses: education/autograding@v1
         id: autograder

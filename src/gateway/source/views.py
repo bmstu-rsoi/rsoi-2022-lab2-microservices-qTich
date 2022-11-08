@@ -221,6 +221,8 @@ def reservations_uuid_return(WSGIRequest, /, **url_kwargs: dict[str, str]) -> Ht
     if reservation_instance.status_code != 200:
         raise NotFound("Problem with reservation")
     reservation_data = as_json(reservation_instance.content)
+    if reservation_data.get("status") != "RENTED":
+        raise NotFound("Reservation is closed.")
     is_expired = reservation_data.get("till_date", "") < params.get("till_date", "")
     reservation_instance = make_request(
         "patch", "http://reservation:8070/api/v1/reservations/{reservation_uid}/return",
@@ -231,6 +233,20 @@ def reservations_uuid_return(WSGIRequest, /, **url_kwargs: dict[str, str]) -> Ht
     )
     if reservation_instance.status_code != 200:
         raise NotFound("Problem with reservation")
+    book_instance = make_request(
+        "get", "http://library:8060/api/v1/libraries/{library_uid}/books/{book_uid}/",
+        headers=WSGIRequest.headers,
+        library_uid=reservation_data.get("library_uid"),
+        book_uid=reservation_data.get("book_uid"),
+    )
+    book_data = as_json(book_instance.content)
+    book_instance = make_request(
+        "patch", "http://library:8060/api/v1/libraries/{library_uid}/books/{book_uid}/",
+        headers=WSGIRequest.headers,
+        library_uid=reservation_data.get("library_uid"),
+        book_uid=reservation_data.get("book_uid"),
+        data=as_bytes({"available_count": book_data.get("available_count", 0) + 1}),
+    )
     if not is_expired:
         rating_instance = make_request(
             "get", "http://rating:8050/api/v1/rating",
