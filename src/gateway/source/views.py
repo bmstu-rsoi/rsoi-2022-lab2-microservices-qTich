@@ -7,6 +7,18 @@ from rest_framework.decorators import api_view
 from rest_framework.exceptions import NotFound
 
 
+def as_json(
+    content: bytes | str
+):
+    return json.loads(content or "{}")
+
+
+def as_bytes(
+    content: dict[str, int | float | str]
+):
+    return json.dumps(content, cls=DjangoJSONEncoder)
+
+
 def map_kwargs(**url_kwargs: dict[str, str]) -> dict[str, str]:
     """
     Add `_` before upper case char.
@@ -20,6 +32,22 @@ def map_kwargs(**url_kwargs: dict[str, str]) -> dict[str, str]:
                 if (char := (c if c.islower() else "_" + c.lower()))
            )
         )
+    }
+
+
+def remap_kwargs(**kwargs) -> dict[str, str]:
+    """
+    Capitalize char after `_`.
+    :param kwargs:
+    :return:
+    """
+    return {
+        (
+            k if index == -1 else k[:index] + k[index + 1:].capitalize()
+        ): (
+            remap_kwargs(**v) if isinstance(v, dict) else [remap_kwargs(**d) if isinstance(d, dict) else d for d in v]
+            if isinstance(v, list) else v
+        ) for k, v in kwargs.items() if (index := k.find("_"))
     }
 
 
@@ -41,33 +69,21 @@ def make_request(
     )
 
 
-def as_HttpResponse(
+def as_JsonResponse(
     request: requests.models.Request = None,
     content: bytes = None,
     status: int = None,
-    headers: dict = None,
 ) -> HttpResponse:
-    if all(arg is None for arg in (request, content, status, headers)):
+    if all(arg is None for arg in (request, content, status)):
         return HttpResponse()
     if content is None:
         content = request.content
     if status is None:
         status = request.status_code
-    if headers is None:
-        headers = request.headers
-    return HttpResponse(content=content, status=status, headers=headers)
-
-
-def as_json(
-    content: bytes | str
-):
-    return json.loads(content or "{}")
-
-
-def as_bytes(
-    content: dict[str, int | float | str]
-):
-    return json.dumps(content, cls=DjangoJSONEncoder)
+    if not isinstance(content, (dict, list)):
+        content = as_json(content)
+    content = [remap_kwargs(**obj) for obj in content] if isinstance(content, list) else remap_kwargs(**content)
+    return JsonResponse(content, status=status, safe=False)
 
 
 def redirect_by_url(url: str):
@@ -82,7 +98,7 @@ def redirect_by_url(url: str):
                 {}
             ), **url_kwargs,
         )
-        return as_HttpResponse(lrequest)
+        return as_JsonResponse(lrequest)
     return wrap
 
 
@@ -158,7 +174,7 @@ def post_reservations(WSGIRequest):
         headers=WSGIRequest.headers, data=as_bytes(params),
     )
     if reservation_instance.status_code != 201:
-        return as_HttpResponse(reservation_instance)
+        return as_JsonResponse(reservation_instance)
     book_instance = make_request(
         "patch", "http://library:8060/api/v1/libraries/{library_uid}/books/{book_uid}/",
         headers=WSGIRequest.headers, library_uid=library_uid, book_uid=book_uid,
@@ -186,14 +202,18 @@ def reservations(WSGIRequest, /, **url_kwargs: dict[str, str]) -> JsonResponse:
         rv_content = get_reservations(WSGIRequest)
     elif WSGIRequest.method == "POST":
         rv_content = post_reservations(WSGIRequest)
-    return JsonResponse(
-        rv_content, status=200, safe=isinstance(rv_content, dict)
-    )
+    return as_JsonResponse(content=rv_content, status=200)
 
 
 @api_view(["POST"])
 def reservations_uuid_return(WSGIRequest, /, **url_kwargs: dict[str, str]) -> HttpResponse:
     params = map_kwargs(**as_json(WSGIRequest.body))
+    if "date" in params:
+        params["till_date"] = params["date"]
+    if "condition" not in params:
+        raise NotFound("\"condition\" is empty")
+    if "till_date" not in params:
+        raise NotFound("\"till_date\" is empty")
     reservation_instance = make_request(
         "get", "http://reservation:8070/api/v1/reservations/{reservation_uid}/",
         headers=WSGIRequest.headers, **url_kwargs,
@@ -228,4 +248,4 @@ def reservations_uuid_return(WSGIRequest, /, **url_kwargs: dict[str, str]) -> Ht
         )
         if rating_instance.status_code != 200:
             raise NotFound("Problem with rating")
-    return as_HttpResponse(content=b"", status=204, headers={})
+    return as_JsonResponse(content=b"", status=204)

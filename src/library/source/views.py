@@ -1,6 +1,9 @@
+from collections import OrderedDict
+
 import django_filters
 from rest_framework.generics import ListAPIView, RetrieveAPIView, RetrieveUpdateAPIView, get_object_or_404
 from rest_framework.renderers import JSONRenderer
+from rest_framework.response import Response
 
 from .serializers import (
     BookLibrarySerializer,
@@ -16,6 +19,16 @@ from rest_framework.pagination import PageNumberPagination
 class Pagination(PageNumberPagination):
     page_size = None
     page_size_query_param = 'size'
+
+    def get_paginated_response(self, data):
+        return Response(OrderedDict([
+            ('total_elements', self.page.paginator.count),
+            ('next', self.get_next_link()),
+            ('previous', self.get_previous_link()),
+            ('page', self.page.number),
+            ('page_size', self.page.paginator.per_page),
+            ('items', data)
+        ]))
 
 
 class LibraryAllAPIView(ListAPIView):

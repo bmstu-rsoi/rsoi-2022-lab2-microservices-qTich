@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "495af3e4-e965-4520-8005-8828e3110b9b",
-		"name": "[rsoi] Library System",
+		"name": "[rsoi][lab2] Library System",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -24,12 +24,14 @@
 									"    const libraryUid = pm.collectionVariables.get(\"libraryUid\")",
 									"",
 									"    const response = pm.response.json();",
-									"    pm.expect(response.results).to.be.an(\"array\")",
-									"    pm.expect(response.count).to.be.not.undefined",
+									"    pm.expect(response.items).to.be.an(\"array\")",
+									"    pm.expect(response.page).to.be.not.undefined",
+									"    pm.expect(response.pageSize).to.be.lte(pageSize)",
+									"    pm.expect(response.totalElements).to.be.not.undefined",
 									"",
-									"    const library = _.find(response.results, { \"library_uid\": libraryUid })",
+									"    const library = _.find(response.items, { \"libraryUid\": libraryUid })",
 									"    pm.expect(library).to.be.not.undefined",
-									"    pm.expect(library.library_uid).to.be.eq(libraryUid)",
+									"    pm.expect(library.libraryUid).to.be.eq(libraryUid)",
 									"    pm.expect(library.name).to.be.eq(\"Библиотека имени 7 Непьющих\")",
 									"    pm.expect(library.city).to.be.eq(city)",
 									"    pm.expect(library.address).to.be.eq(\"2-я Бауманская ул., д.5, стр.1\")",
@@ -130,12 +132,14 @@
 									"    const bookUid = pm.collectionVariables.get(\"bookUid\")",
 									"",
 									"    const response = pm.response.json();",
-									"    pm.expect(response.results).to.be.an(\"array\")",
-									"    pm.expect(response.count).to.be.not.undefined",
+									"    pm.expect(response.items).to.be.an(\"array\")",
+									"    pm.expect(response.page).to.be.not.undefined",
+									"    pm.expect(response.pageSize).to.be.lte(pageSize)",
+									"    pm.expect(response.totalElements).to.be.not.undefined",
 									"",
-									"    const book = _.find(response.results, { \"book_uid\": bookUid })",
+									"    const book = _.find(response.items, { \"bookUid\": bookUid })",
 									"    pm.expect(book).to.be.not.undefined",
-									"    pm.expect(book.book_uid).to.be.eq(bookUid)",
+									"    pm.expect(book.bookUid).to.be.eq(bookUid)",
 									"    pm.expect(book.name).to.be.eq(\"Краткий курс C++ в 7 томах\")",
 									"    pm.expect(book.author).to.be.eq(\"Бьерн Страуструп\")",
 									"    pm.expect(book.genre).to.be.eq(\"Научная фантастика\")",
@@ -234,7 +238,7 @@
 								}
 							],
 							"cookie": [],
-							"body": "{\n    \"page\": 1,\n    \"pageSize\": 1,\n    \"totalElements\": 1,\n    \"items\": [\n        {\n            \"bookUid\": \"f7cdc58f-2caf-4b15-9727-f89dcc629b27\",\n            \"name\": \"Краткий курс C++ в 7 томах\",\n            \"author\": \"Бьерн Страуструп\",\n            \"genre\": \"Научная фантастика\",\n            \"condition\": \"EXCELLENT\",\n            \"availableCount\": 1\n        }\n    ]\n}"
+							"body": "{\n    \"page\": 1,\n    \"pageSize\": 1,\n    \"totalElements\": 1,\n    \"items\": [\n        {\n            \"bookUid\": \"f7cdc58f-2caf-4b15-9727-f89dcc629b27\",\n            \"name\": \"Краткий курс C++ в 7 томах\",\n            \"author\": \"Бьерн Страуструп\",\n            \"genre\": \"Научная фантастика\",\n            \"condition\": \"EXCELLENT\",\n            \"avaiblableCount\": 1\n        }\n    ]\n}"
 						}
 					]
 				},
@@ -337,22 +341,22 @@
 									"    const request = JSON.parse(pm.request.body.raw)",
 									"",
 									"    pm.expect(response.status).to.be.eq(\"RENTED\")",
-									"    pm.expect(response.start_date).to.be.eq(moment().format(\"YYYY-MM-DD\"))",
-									"    pm.expect(response.till_date).to.be.eq(request.tillDate)",
+									"    pm.expect(response.startDate).to.be.eq(moment().format(\"YYYY-MM-DD\"))",
+									"    pm.expect(response.tillDate).to.be.eq(request.tillDate)",
 									"",
 									"    pm.expect(response.book).to.be.not.undefined",
-									"    pm.expect(response.book.book_uid).to.be.eq(bookUid)",
+									"    pm.expect(response.book.bookUid).to.be.eq(bookUid)",
 									"    pm.expect(response.book.name).to.be.eq(\"Краткий курс C++ в 7 томах\")",
 									"    pm.expect(response.book.author).to.be.eq(\"Бьерн Страуструп\")",
 									"    pm.expect(response.book.genre).to.be.eq(\"Научная фантастика\")",
 									"",
 									"    pm.expect(response.library).to.be.not.undefined",
-									"    pm.expect(response.library.library_uid).to.be.eq(libraryUid)",
+									"    pm.expect(response.library.libraryUid).to.be.eq(libraryUid)",
 									"    pm.expect(response.library.name).to.be.eq(\"Библиотека имени 7 Непьющих\")",
 									"    pm.expect(response.library.city).to.be.eq(\"Москва\")",
 									"    pm.expect(response.library.address).to.be.eq(\"2-я Бауманская ул., д.5, стр.1\")",
 									"",
-									"    pm.collectionVariables.set(\"reservationUid\", response.reservation_uid)",
+									"    pm.collectionVariables.set(\"reservationUid\", response.reservationUid)",
 									"})"
 								],
 								"type": "text/javascript"
@@ -458,19 +462,19 @@
 									"",
 									"    const response = pm.response.json();",
 									"    pm.expect(response).to.be.an(\"array\")",
-									"    const reservation = _.find(response, { \"reservation_uid\": reservationUid })",
+									"    const reservation = _.find(response, { \"reservationUid\": reservationUid })",
 									"    pm.expect(reservation.status).to.be.eq(\"RENTED\")",
-									"    pm.expect(reservation.start_date).to.be.not.undefined",
-									"    pm.expect(reservation.till_date).to.be.not.undefined",
+									"    pm.expect(reservation.startDate).to.be.not.undefined",
+									"    pm.expect(reservation.tillDate).to.be.not.undefined",
 									"",
 									"    pm.expect(reservation.book).to.be.not.undefined",
-									"    pm.expect(reservation.book.book_uid).to.be.eq(bookUid)",
+									"    pm.expect(reservation.book.bookUid).to.be.eq(bookUid)",
 									"    pm.expect(reservation.book.name).to.be.eq(\"Краткий курс C++ в 7 томах\")",
 									"    pm.expect(reservation.book.author).to.be.eq(\"Бьерн Страуструп\")",
 									"    pm.expect(reservation.book.genre).to.be.eq(\"Научная фантастика\")",
 									"",
 									"    pm.expect(reservation.library).to.be.not.undefined",
-									"    pm.expect(reservation.library.library_uid).to.be.eq(libraryUid)",
+									"    pm.expect(reservation.library.libraryUid).to.be.eq(libraryUid)",
 									"    pm.expect(reservation.library.name).to.be.eq(\"Библиотека имени 7 Непьющих\")",
 									"    pm.expect(reservation.library.city).to.be.eq(\"Москва\")",
 									"    pm.expect(reservation.library.address).to.be.eq(\"2-я Бауманская ул., д.5, стр.1\")",
@@ -569,7 +573,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"condition\": \"EXCELLENT\",\n    \"tillDate\": \"2021-10-11\"\n}"
+							"raw": "{\n    \"condition\": \"EXCELLENT\",\n    \"date\": \"2021-10-11\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/v1/reservations/:reservationUid/return",
@@ -606,7 +610,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"condition\": \"EXCELLENT\",\n    \"tillDate\": \"2021-10-11\"\n}"
+									"raw": "{\n    \"condition\": \"EXCELLENT\",\n    \"date\": \"2021-10-11\"\n}"
 								},
 								"url": {
 									"raw": "{{baseUrl}}/api/v1/reservations/:reservationUid/return",
