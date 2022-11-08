@@ -17,6 +17,9 @@ jobs:
 
       - uses: docker/setup-buildx-action@v2
 
+      - name: Drop volumes
+        run: docker compose down --volumes
+
       - name: Build images
         timeout-minutes: 10
         run: docker compose build
